@@ -19,13 +19,33 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Fix settings.gradle
+        run: |
+          cat > NFCBeam_fixed/settings.gradle << 'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "NFCBeam"
+          include ':app'
+          EOF
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build Debug APK
         run: |
           cd NFCBeam_fixed
-          gradle wrapper
+          gradle wrapper --gradle-version=8.4
           ./gradlew assembleDebug
 
       - name: Upload APK
