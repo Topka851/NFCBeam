@@ -21,6 +21,8 @@ jobs:
 
       - name: Fix build files
         run: |
+          mkdir -p NFCBeam_fixed/app/src/main/res/values
+          
           cat > NFCBeam_fixed/settings.gradle << 'EOF'
           pluginManagement {
               repositories {
@@ -38,7 +40,7 @@ jobs:
           rootProject.name = "NFCBeam"
           include ':app'
           EOF
-          
+
           cat > NFCBeam_fixed/build.gradle << 'EOF'
           buildscript {
               ext.kotlin_version = "1.9.0"
@@ -53,7 +55,13 @@ jobs:
           }
           EOF
 
-      - name: Install specific Gradle
+          cat > NFCBeam_fixed/gradle.properties << 'EOF'
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx2048m
+          EOF
+
+      - name: Install Gradle 8.4
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
           unzip -q gradle-8.4-bin.zip -d /opt/gradle
