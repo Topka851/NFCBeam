@@ -21,8 +21,6 @@ jobs:
 
       - name: Fix build files
         run: |
-          mkdir -p NFCBeam_fixed/app/src/main/res/values
-          
           cat > NFCBeam_fixed/settings.gradle << 'EOF'
           pluginManagement {
               repositories {
@@ -60,6 +58,16 @@ jobs:
           android.enableJetifier=true
           org.gradle.jvmargs=-Xmx2048m
           EOF
+
+      - name: Create launcher icons
+        run: |
+          for dpi in mipmap-mdpi mipmap-hdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi; do
+            mkdir -p NFCBeam_fixed/app/src/main/res/$dpi
+            convert -size 48x48 xc:#00D4FF \
+              NFCBeam_fixed/app/src/main/res/$dpi/ic_launcher.png
+            cp NFCBeam_fixed/app/src/main/res/$dpi/ic_launcher.png \
+              NFCBeam_fixed/app/src/main/res/$dpi/ic_launcher_round.png
+          done
 
       - name: Install Gradle 8.4
         run: |
