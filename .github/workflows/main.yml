@@ -19,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Fix settings.gradle
+      - name: Fix build files
         run: |
           cat > NFCBeam_fixed/settings.gradle << 'EOF'
           pluginManagement {
@@ -38,9 +38,39 @@ jobs:
           rootProject.name = "NFCBeam"
           include ':app'
           EOF
+          
+          cat > NFCBeam_fixed/build.gradle << 'EOF'
+          buildscript {
+              ext.kotlin_version = "1.9.0"
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.1.0'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+              }
+          }
+          EOF
+
+      - name: Install specific Gradle
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+          unzip -q gradle-8.4-bin.zip -d /opt/gradle
+          echo "/opt/gradle/gradle-8.4/bin" >> $GITHUB_PATH
+
+      - name: Create gradle wrapper
+        run: |
+          cd NFCBeam_fixed
+          gradle wrapper --gradle-version=8.4
 
       - name: Build Debug APK
         run: |
           cd NFCBeam_fixed
-          gradle wrapper --gradle-version=7.6
-          ./gradlew assembleDebug --warning-mod
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NFCBeam-debug
+          path: NFCBeam_fixed/app/build/outputs/apk/debug/app-debug.apk
